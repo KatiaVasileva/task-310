@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="
+        http://www.liquibase.org/xml/ns/dbchangelog
+        https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <!-- WRITER -->
+
+    <changeSet id="001-create-writer" author="vasileva">
+        <createTable tableName="tbl_writer">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true"
+                             primaryKeyName="pk_writer"
+                             nullable="false"/>
+            </column>
+
+            <column name="login" type="VARCHAR(255)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+
+            <column name="password" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="firstname" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="lastname" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <!-- ISSUE -->
+
+    <changeSet id="002-create-issue" author="vasileva">
+        <createTable tableName="tbl_issue">
+
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true"
+                             primaryKeyName="pk_issue"
+                             nullable="false"/>
+            </column>
+
+            <column name="title" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="content" type="TEXT"/>
+
+            <column name="created" type="TIMESTAMP"/>
+
+            <column name="modified" type="TIMESTAMP"/>
+
+            <column name="writer_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+
+        </createTable>
+
+        <addForeignKeyConstraint
+                constraintName="fk_issue_writer"
+                baseTableName="tbl_issue"
+                baseColumnNames="writer_id"
+                referencedTableName="tbl_writer"
+                referencedColumnNames="id"/>
+    </changeSet>
+
+    <!-- NOTE -->
+
+    <changeSet id="003-create-note" author="vasileva">
+        <createTable tableName="tbl_note">
+
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true"
+                             primaryKeyName="pk_note"
+                             nullable="false"/>
+            </column>
+
+            <column name="content" type="TEXT"/>
+
+            <column name="issue_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+
+        </createTable>
+
+        <addForeignKeyConstraint
+                constraintName="fk_note_issue"
+                baseTableName="tbl_note"
+                baseColumnNames="issue_id"
+                referencedTableName="tbl_issue"
+                referencedColumnNames="id"/>
+    </changeSet>
+
+    <!-- TAG -->
+
+    <changeSet id="004-create-tag" author="vasileva">
+        <createTable tableName="tbl_tag">
+
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true"
+                             primaryKeyName="pk_tag"
+                             nullable="false"/>
+            </column>
+
+            <column name="name" type="VARCHAR(255)">
+                <constraints nullable="false"
+                             unique="true"/>
+            </column>
+
+        </createTable>
+    </changeSet>
+
+    <!-- ISSUE_TAG -->
+
+    <changeSet id="005-create-issue-tag" author="vasileva">
+        <createTable tableName="tbl_issue_tag">
+
+            <column name="issue_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="tag_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+
+        </createTable>
+
+        <addPrimaryKey
+                tableName="tbl_issue_tag"
+                columnNames="issue_id, tag_id"
+                constraintName="pk_issue_tag"/>
+
+        <addForeignKeyConstraint
+                constraintName="fk_issue_tag_issue"
+                baseTableName="tbl_issue_tag"
+                baseColumnNames="issue_id"
+                referencedTableName="tbl_issue"
+                referencedColumnNames="id"/>
+
+        <addForeignKeyConstraint
+                constraintName="fk_issue_tag_tag"
+                baseTableName="tbl_issue_tag"
+                baseColumnNames="tag_id"
+                referencedTableName="tbl_tag"
+                referencedColumnNames="id"/>
+
+    </changeSet>
+
+</databaseChangeLog>

@@ -1,70 +1,82 @@
 package com.vasileva.task310.service;
 
-import com.vasileva.task310.mapper.NoteDto;
-import com.vasileva.task310.model.Issue.Issue;
-import com.vasileva.task310.model.note.Note;
 import com.vasileva.task310.model.note.NoteIn;
 import com.vasileva.task310.model.note.NoteOut;
 import com.vasileva.task310.repository.IssueRepository;
-import com.vasileva.task310.repository.NoteRepository;
 import lombok.AllArgsConstructor;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestClient;
 
 import java.util.List;
-import java.util.NoSuchElementException;
 
 @Service
 @AllArgsConstructor
-public class NoteService {
+public class NoteService implements RestService<NoteIn, NoteOut> {
 
-    private final NoteRepository noteRepository;
+    public static final ParameterizedTypeReference<List<NoteOut>> LIST_NOTE_OUT =
+            new ParameterizedTypeReference<>() {
+            };
+    private final RestClient noteRestClient;
     private final IssueRepository issueRepository;
-    private final NoteDto mapper;
 
+    @Override
     public List<NoteOut> getAll() {
-        return noteRepository
-                .findAll()
-                .stream()
-                .map(mapper::out)
-                .toList();
+        return noteRestClient
+                .get()
+                .retrieve()
+                .body(LIST_NOTE_OUT);
     }
 
-    public NoteOut get(Long id) {
-        return noteRepository
-                .findById(id)
-                .map(mapper::out)
-                .orElseThrow(() -> new NoSuchElementException(
-                        String.format("Note with id=%s not found", id)));
+    @Override
+    public NoteOut get(long id) {
+        return noteRestClient
+                .get()
+                .uri("/{id}", id)
+                .retrieve()
+                .body(NoteOut.class);
     }
 
+    @Override
     public NoteOut create(NoteIn noteIn) {
-        Note newNote = mapper.in(noteIn);
-        Issue issue = issueRepository.findById(noteIn.getIssueId())
-                .orElseThrow(() -> new NoSuchElementException(
-                        String.format("Issue with id=%s not found", noteIn.getIssueId())));
-        newNote.setIssue(issue);
-        return mapper
-                .out(noteRepository.save(newNote));
-    }
-
-    public NoteOut update(NoteIn noteIn) {
-        Note noteToUpdate = noteRepository.findById(noteIn.getId())
-                .orElseThrow(() -> new NoSuchElementException(
-                        String.format("Note with id=%s not found", noteIn.getId())));
-        Issue issue = issueRepository.findById(noteIn.getIssueId())
-                .orElseThrow(() -> new NoSuchElementException(
-                        String.format("Issue with id=%s not found", noteIn.getIssueId())));
-        noteToUpdate.setIssue(issue);
-        noteToUpdate.setContent(noteIn.getContent());
-        return mapper.out(noteRepository
-                .save(noteToUpdate));
-    }
-
-    public void delete(Long id) {
-        if(!noteRepository.existsById(id)) {
-            throw new NoSuchElementException(String.format("Note with id=%d not found", id));
+        Long issueId = noteIn.getIssueId();
+        if (issueRepository.existsById(issueId)) {
+            return noteRestClient
+                    .post()
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(noteIn)
+                    .retrieve()
+                    .body(NoteOut.class);
+        } else {
+            throw new IllegalStateException("incorrect issueId=" + issueId);
         }
-        noteRepository.deleteById(id);
+    }
+
+    @Override
+    public NoteOut update(NoteIn noteIn) {
+        Long issueId = noteIn.getIssueId();
+        if (issueRepository.existsById(issueId)) {
+            return noteRestClient
+                    .put()
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(noteIn)
+                    .retrieve()
+                    .body(NoteOut.class);
+        } else {
+            throw new IllegalStateException("incorrect storyId=" + issueId);
+        }
+    }
+
+    @Override
+    public boolean delete(Long id) {
+        return noteRestClient
+                .delete()
+                .uri("/{id}", id)
+                .retrieve()
+                .toBodilessEntity()
+                .getStatusCode()
+                .is2xxSuccessful();
     }
 }
 
