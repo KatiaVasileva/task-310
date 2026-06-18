@@ -5,7 +5,8 @@ import jakarta.validation.constraints.Size;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
-import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 
 @Data
 @Builder
@@ -26,7 +27,6 @@ public class IssueIn {
     @Size(min = 4, max = 2048)
     String content;
 
-    LocalDateTime created;
+    Set<String> tags = new HashSet<>();
 
-    LocalDateTime modified;
 }

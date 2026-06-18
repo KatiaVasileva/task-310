@@ -4,47 +4,52 @@ import com.vasileva.task310.mapper.TagDto;
 import com.vasileva.task310.model.tag.Tag;
 import com.vasileva.task310.model.tag.TagIn;
 import com.vasileva.task310.model.tag.TagOut;
-import com.vasileva.task310.repository.Repo;
+import com.vasileva.task310.repository.TagRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 
 @Service
 @AllArgsConstructor
 public class TagService {
-    private final Repo<Tag> repoImpl;
+    private final TagRepository tagRepository;
     private final TagDto mapper;
 
     public List<TagOut> getAll() {
-        return repoImpl
-                .getAll()
+        return tagRepository
+                .findAll()
+                .stream()
                 .map(mapper::out)
                 .toList();
     }
 
     public TagOut get(Long id) {
-        return repoImpl
-                .get(id)
+        return tagRepository
+                .findById(id)
                 .map(mapper::out)
-                .orElseThrow(() -> new RuntimeException("Tag not found"));
+                .orElseThrow(() -> new NoSuchElementException(String.format("Tag not found with id %d", id)));
     }
 
     public TagOut create(TagIn tagIn) {
-        return repoImpl
-                .create(mapper.in(tagIn))
-                .map(mapper::out)
-                .orElseThrow();
+        return mapper.out(tagRepository
+                .save(mapper.in(tagIn)));
     }
 
     public TagOut update(TagIn tagIn) {
-        return repoImpl
-                .update(mapper.in(tagIn))
-                .map(mapper::out)
-                .orElseThrow(() -> new RuntimeException("Tag not found"));
+        Tag tagToUpdate = tagRepository.findById(tagIn.getId())
+                .orElseThrow(() -> new NoSuchElementException(
+                        String.format("Tag not found with id %d", tagIn.getId())));
+        tagToUpdate.setName(tagIn.getName());
+        return mapper.out(tagRepository
+                .save(tagToUpdate));
     }
 
-    public boolean delete(Long id) {
-        return repoImpl.delete(id);
+    public void delete(Long id) {
+        if(!tagRepository.existsById(id)) {
+            throw new NoSuchElementException("Tag not found with id=" + id);
+        }
+        tagRepository.deleteById(id);
     }
 }

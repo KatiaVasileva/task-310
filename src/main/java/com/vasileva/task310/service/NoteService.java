@@ -1,52 +1,70 @@
 package com.vasileva.task310.service;
 
 import com.vasileva.task310.mapper.NoteDto;
+import com.vasileva.task310.model.Issue.Issue;
 import com.vasileva.task310.model.note.Note;
 import com.vasileva.task310.model.note.NoteIn;
 import com.vasileva.task310.model.note.NoteOut;
-import com.vasileva.task310.repository.Repo;
+import com.vasileva.task310.repository.IssueRepository;
+import com.vasileva.task310.repository.NoteRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 
 @Service
 @AllArgsConstructor
 public class NoteService {
 
-    private final Repo<Note> repoImpl;
+    private final NoteRepository noteRepository;
+    private final IssueRepository issueRepository;
     private final NoteDto mapper;
 
     public List<NoteOut> getAll() {
-        return repoImpl
-                .getAll()
+        return noteRepository
+                .findAll()
+                .stream()
                 .map(mapper::out)
                 .toList();
     }
 
     public NoteOut get(Long id) {
-        return repoImpl
-                .get(id)
+        return noteRepository
+                .findById(id)
                 .map(mapper::out)
-                .orElseThrow(() -> new RuntimeException("Note not found"));
+                .orElseThrow(() -> new NoSuchElementException(
+                        String.format("Note with id=%s not found", id)));
     }
 
     public NoteOut create(NoteIn noteIn) {
-        return repoImpl
-                .create(mapper.in(noteIn))
-                .map(mapper::out)
-                .orElseThrow();
+        Note newNote = mapper.in(noteIn);
+        Issue issue = issueRepository.findById(noteIn.getIssueId())
+                .orElseThrow(() -> new NoSuchElementException(
+                        String.format("Issue with id=%s not found", noteIn.getIssueId())));
+        newNote.setIssue(issue);
+        return mapper
+                .out(noteRepository.save(newNote));
     }
 
     public NoteOut update(NoteIn noteIn) {
-        return repoImpl
-                .update(mapper.in(noteIn))
-                .map(mapper::out)
-                .orElseThrow(() -> new RuntimeException("Note not found"));
+        Note noteToUpdate = noteRepository.findById(noteIn.getId())
+                .orElseThrow(() -> new NoSuchElementException(
+                        String.format("Note with id=%s not found", noteIn.getId())));
+        Issue issue = issueRepository.findById(noteIn.getIssueId())
+                .orElseThrow(() -> new NoSuchElementException(
+                        String.format("Issue with id=%s not found", noteIn.getIssueId())));
+        noteToUpdate.setIssue(issue);
+        noteToUpdate.setContent(noteIn.getContent());
+        return mapper.out(noteRepository
+                .save(noteToUpdate));
     }
 
-    public boolean delete(Long id) {
-        return repoImpl.delete(id);
+    public void delete(Long id) {
+        if(!noteRepository.existsById(id)) {
+            throw new NoSuchElementException(String.format("Note with id=%d not found", id));
+        }
+        noteRepository.deleteById(id);
     }
 }
 

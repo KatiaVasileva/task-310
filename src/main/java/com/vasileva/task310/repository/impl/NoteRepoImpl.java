@@ -11,7 +11,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Stream;
 
 @Repository
-public class NoteRepository implements Repo<Note> {
+public class NoteRepoImpl implements Repo<Note> {
 
     private final Map<Long, Note> memoryDatabase = new ConcurrentHashMap<>();
     private static final AtomicLong idGenerator = new AtomicLong();

@@ -13,7 +13,7 @@ public class WriterOut {
     Long id;
     String login;
     @JsonProperty("firstname")
-    String firstName;
+    String firstname;
     @JsonProperty("lastname")
-    String lastName;
+    String lastname;
 }

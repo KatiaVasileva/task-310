@@ -22,8 +22,8 @@ public class WriterRepoImpl implements Repo<Writer> {
                 .id(id)
                 .login("eka.vasilev@gmail.com")
                 .password("12345678")
-                .firstName("Екатерина")
-                .lastName("Васильева")
+                .firstname("Екатерина")
+                .lastname("Васильева")
                 .build());
     }
 

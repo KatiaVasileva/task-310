@@ -18,14 +18,14 @@ public class WriterIn {
     @Size(min = 2, max = 64)
     String login;
 
-//    @Size(min = 8, max = 128)
+    @Size(min = 8, max = 128)
     String password;
 
     @Size(min = 2, max = 64)
     @JsonProperty("firstname")
-    String firstName;
+    String firstname;
 
     @Size(min = 2, max = 64)
     @JsonProperty("lastname")
-    String lastName;
+    String lastname;
 }

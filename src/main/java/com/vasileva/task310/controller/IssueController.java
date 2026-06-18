@@ -7,10 +7,8 @@ import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Collection;
-import java.util.NoSuchElementException;
 
 @RestController
 @RequestMapping("api/v1.0/issues")
@@ -33,11 +31,7 @@ public class IssueController {
     @PutMapping
     @ResponseStatus(HttpStatus.OK)
     public IssueOut updateIssue(@RequestBody @Valid IssueIn issueIn) {
-        try {
-            return issueService.update(issueIn);
-        } catch (NoSuchElementException e) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
-        }
+        return issueService.update(issueIn);
     }
 
     @GetMapping("/{id}")
@@ -48,9 +42,6 @@ public class IssueController {
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteIssueById(@PathVariable Long id) {
-        boolean isDeleted = issueService.delete(id);
-        if (!isDeleted) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
-        }
+        issueService.delete(id);
     }
 }

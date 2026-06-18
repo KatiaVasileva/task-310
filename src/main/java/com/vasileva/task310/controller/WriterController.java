@@ -7,10 +7,8 @@ import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Collection;
-import java.util.NoSuchElementException;
 
 @RestController
 @RequestMapping("api/v1.0/writers")
@@ -33,11 +31,7 @@ public class WriterController {
     @PutMapping
     @ResponseStatus(HttpStatus.OK)
     public WriterOut updateWriter(@RequestBody @Valid WriterIn writeIn) {
-        try {
-            return writerService.update(writeIn);
-        } catch (NoSuchElementException e) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
-        }
+        return writerService.update(writeIn);
     }
 
     @GetMapping("/{id}")
@@ -48,9 +42,6 @@ public class WriterController {
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteWriterById(@PathVariable Long id) {
-        boolean isDeleted = writerService.delete(id);
-        if (!isDeleted) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
-        }
+        writerService.delete(id);
     }
 }

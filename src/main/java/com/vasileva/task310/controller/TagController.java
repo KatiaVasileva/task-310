@@ -7,10 +7,8 @@ import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Collection;
-import java.util.NoSuchElementException;
 
 @RestController
 @RequestMapping("api/v1.0/tags")
@@ -33,11 +31,7 @@ public class TagController {
     @PutMapping
     @ResponseStatus(HttpStatus.OK)
     public TagOut updateTag(@RequestBody @Valid TagIn tagIn) {
-        try {
-            return tagService.update(tagIn);
-        } catch (NoSuchElementException e) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
-        }
+        return tagService.update(tagIn);
     }
 
     @GetMapping("/{id}")
@@ -48,9 +42,6 @@ public class TagController {
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteTagById(@PathVariable Long id) {
-        boolean isDeleted = tagService.delete(id);
-        if (!isDeleted) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
-        }
+        tagService.delete(id);
     }
 }

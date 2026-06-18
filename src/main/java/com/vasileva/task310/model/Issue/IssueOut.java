@@ -4,6 +4,8 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 
 @Data
 @Builder
@@ -17,4 +19,6 @@ public class IssueOut {
     String content;
     LocalDateTime created;
     LocalDateTime modified;
+
+    Set<String> tags = new HashSet<>();
 }

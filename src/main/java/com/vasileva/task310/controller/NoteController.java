@@ -7,10 +7,8 @@ import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Collection;
-import java.util.NoSuchElementException;
 
 @RestController
 @RequestMapping("api/v1.0/notes")
@@ -32,11 +30,7 @@ public class NoteController {
     @PutMapping
     @ResponseStatus(HttpStatus.OK)
     public NoteOut updateNote(@RequestBody @Valid NoteIn noteIn) {
-        try {
-            return noteService.update(noteIn);
-        } catch (NoSuchElementException e) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
-        }
+        return noteService.update(noteIn);
     }
 
     @GetMapping("/{id}")
@@ -47,9 +41,6 @@ public class NoteController {
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteNoteById(@PathVariable Long id) {
-        boolean isDeleted = noteService.delete(id);
-        if (!isDeleted) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
-        }
+        noteService.delete(id);
     }
 }
